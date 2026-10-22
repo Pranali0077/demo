@@ -1,9 +1,14 @@
 pipeline {
   agent any
   stages {
-    stage('Build') { steps { echo 'Building..' } }
-    stage('Test') { steps { echo 'Testing...' } }
-    stage('Done') { steps { echo 'Pipeline completed' } }
-  }
+    stage('Checkout') { steps { checkout.scm } }
+    stage('Build') { steps { bat 'build.bat' } }
+    stage('Test') { steps { bat 'test.bat } }
+    stage('Package') { steps { bat 'package.bat } }
+                              
+}  
+post {
+  success { archiveArtifacts artifacts: 'dist/**', fingerprint: true }
+  failure { echo 'CI pipeline failed' }
 }  
   
