@@ -1,42 +1,12 @@
 pipeline {
     agent any
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        stage('Build') {
-            steps {
-                script {
-                    if (isUnix()) { sh './build.sh' } else { bat 'build.bat' }
-                }
-            }
-        }
-        stage('Test') {
-            steps {
-                script {
-                    if (isUnix()) { sh './test.sh' } else { bat 'test.bat' }
-                }
-            }
-        }
-        stage('Package') {
-            steps {
-                script {
-                    if (isUnix()) { sh './package.sh' } else { bat 'package.bat' }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            archiveArtifacts artifacts: 'dist/**', fingerprint: true, allowEmptyArchive: true
-            echo 'CI pipeline succeeded'
-        }
-        failure {
-            echo 'CI pipeline failed'
-        }
+    parameters {
+        choice (name: 'Environment', choices: ['staging', 'production'],description: 'Target')
+    }    
+    stages ('Tests') {
+        parallel {
+            stage('Unit') { steps {bat 'echo Unit tests' } }
+            stage('Integration') { steps { bat 'echo Integration tests' } }
+        }       
     }
 }
