@@ -1,22 +1,15 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'ENVIRONMENT', choices: ['staging', 'production'],
-           description: 'Target')
+    choice(name: 'ENVIRONMENT', choices: ['dev','staging', 'production'])
   }
   stages {
-    stage('Tests') {
-  parallel {
-    stage('Unit') { steps { bat 'echo Unit tests' } }
-    stage('Integration') { steps { bat 'echo Integration tests' } }
-  }
-}
-    stage('package') { steps { bat 'package.bat' } }
-
-}
-post {
-      success { archiveArtifacts artifacts: 'dist/**' }
-      failure { echo 'CI pipeline failed' }
-
+    stage('Approve') {
+      when { expression { params.ENVIRONMENT == 'prduction' } }
+      steps { input message: 'Deploy to production?' }
+    }
+    stage('Deploy') {
+      steps { bat "echo Deploy to ${params.ENVIRONMENT}" }
+    }
   }
 }
